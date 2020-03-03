@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">SimpleChatbot</string>
     <string name="listening_button">Start Listening</string>
+    <string name="listening_button_listening">Listening...</string>
 </resources>
