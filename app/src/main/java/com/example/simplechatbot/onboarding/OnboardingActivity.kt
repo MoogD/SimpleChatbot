@@ -1,6 +1,7 @@
 package com.example.simplechatbot.onboarding
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import com.google.android.material.snackbar.Snackbar
@@ -65,6 +66,15 @@ class OnboardingActivity : AppCompatActivity(), HasAndroidInjector,  OnOnboardin
 
     }
 
+    companion object {
+        const val REQUEST_PERMISSIONS: Int = 20001
+        const val REQUEST_ENABLE_BT: Int = 20002
 
+        fun intent(context: Context) =
+            Intent(context, OnboardingActivity::class.java)
+                .apply {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                }
+    }
 
 }
