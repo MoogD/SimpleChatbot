@@ -1,6 +1,8 @@
 package com.example.simplechatbot
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +17,8 @@ import java.io.File
 private const val REQUEST_MICROPHONE = 0
 private const val REQUEST_WRITE_STORAGE = 1
 class MainActivity : AppCompatActivity() {
+
+    lateinit var recorder: MediaRecorder
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,15 +41,16 @@ class MainActivity : AppCompatActivity() {
                 REQUEST_WRITE_STORAGE
             )
         }
-        val recorder = prepareRecorder()
 
         listeningButton.setOnClickListener {
             if (!listening) {
+                recorder = prepareRecorder()
                 recorder.start()
                 listeningButton.text = getString(R.string.listening_button_listening)
             }
             else {
                 recorder.stop()
+                recorder.release()
                 listeningButton.text = getString(R.string.listening_button)
             }
             listening = !listening
@@ -61,8 +66,7 @@ class MainActivity : AppCompatActivity() {
         recorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB)
 
         val file = File(
-            Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_MUSIC).absolutePath,
+            "/data/data/com.example.simplechatbot/",
                 "AudioRecording.3gp"
         )
         file.createNewFile()
@@ -71,4 +75,11 @@ class MainActivity : AppCompatActivity() {
         return recorder
     }
 
+
+    companion object {
+        fun intent(context: Context) =
+            Intent(context, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+    }
 }
