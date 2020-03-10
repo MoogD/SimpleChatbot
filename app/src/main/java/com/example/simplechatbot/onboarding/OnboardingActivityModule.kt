@@ -1,6 +1,6 @@
 package com.example.simplechatbot.onboarding
 
-import com.example.simplechatbot.onboarding.fragments.OnboadringStartFragment
+import com.example.simplechatbot.onboarding.fragments.OnboardingStartFragment
 import com.example.simplechatbot.onboarding.fragments.OnboardingStartFragmentModule
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
@@ -9,5 +9,5 @@ import dagger.android.ContributesAndroidInjector
 abstract class OnboardingActivityModule {
 
     @ContributesAndroidInjector(modules = [(OnboardingStartFragmentModule::class)])
-    abstract fun bindStartFragment(): OnboadringStartFragment
+    abstract fun bindStartFragment(): OnboardingStartFragment
 }

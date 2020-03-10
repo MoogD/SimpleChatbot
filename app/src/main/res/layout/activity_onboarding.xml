@@ -20,11 +20,17 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+<!--    <fragment-->
+<!--        android:name="com.example.simplechatbot.onboarding.fragments.OnboardingStartFragment"-->
+<!--        android:id="@+id/fooFragment"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="0dp"/>-->
     <LinearLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="vertical" />
+        android:orientation="vertical"
+        android:visibility="visible"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -25,18 +25,12 @@ import javax.inject.Inject
 
 private const val REQUEST_MICROPHONE = 0
 private const val REQUEST_WRITE_STORAGE = 1
-class MainActivity : AppCompatActivity(), HasAndroidInjector {
+class MainActivity : BaseActivity(), HasAndroidInjector {
 //
 //    lateinit var recorder: MediaRecorder
 
     @field :[Inject ApplicationContext]
     internal lateinit var context: Context
-
-    @Inject
-    lateinit var appManager: AppStateManager
-
-    @Inject
-    lateinit var androidInjector: DispatchingAndroidInjector<Any>
 
     override fun androidInjector(): AndroidInjector<Any> {
         return androidInjector
@@ -47,52 +41,16 @@ class MainActivity : AppCompatActivity(), HasAndroidInjector {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
 
-        // Fix bolean? to get rid of boolean equality check
-        if (appManager.app.onboardingIsDone == null || !appManager.app.onboardingIsDone!!) {
+        setContentView(R.layout.activity_main)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!appManager.app.onboardingIsDone!!) {
             startActivity(OnboardingActivity.intent(context))
             finish()
         }
-
-        setContentView(R.layout.activity_main)
-
-//        var listening = false
-//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-//            != PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(
-//                this,
-//                arrayOf(Manifest.permission.RECORD_AUDIO),
-//                REQUEST_MICROPHONE
-//            )
-//        }
-//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//            != PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(
-//                this,
-//                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-//                REQUEST_WRITE_STORAGE
-//            )
-//        }
-//
-//        listeningButton.setOnClickListener {
-//            if (!listening) {
-//                recorder = prepareRecorder()
-//                recorder.start()
-//                listeningButton.text = getString(R.string.listening_button_listening)
-//            }
-//            else {
-//                recorder.stop()
-//                recorder.release()
-//                listeningButton.text = getString(R.string.listening_button)
-//            }
-//            listening = !listening
-//        }
     }
-
-//    Move to BaseActivity
-//    override fun attachBaseContext(newBase: Context) {
-//        super.attachBaseContext(newBase)
-//    }
-
 
     fun prepareRecorder(): MediaRecorder {
         val recorder = MediaRecorder()
