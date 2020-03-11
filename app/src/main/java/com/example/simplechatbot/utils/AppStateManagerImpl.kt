@@ -1,6 +1,5 @@
 package com.example.simplechatbot.utils
 
-import android.accounts.Account
 import android.content.Context
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import java.util.*
@@ -8,10 +7,12 @@ import java.util.*
 class AppStateManagerImpl(val context: Context) : AppStateManager {
 
     var isOnboardingInitialized = false
+    var isAccountInitialized = false
     override var account: GoogleSignInAccount?
-        get() = account
+        get() = if (isAccountInitialized) account else null
         set(value) {
             account = value
+            isAccountInitialized = true
         }
 
     override val app: AppStateManager.App = object : AppStateManager.App {

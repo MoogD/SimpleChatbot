@@ -123,6 +123,7 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
     override fun onNextStep(): Boolean {
         if (currentStepIndex < onboardingSteps.size - 1) {
             currentStepIndex++
+            loadCurrentStepFragment()
         } else {
             container.visibility = View.INVISIBLE
             startActivity(MainActivity.intent(context))
@@ -144,9 +145,9 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
 
     fun configureSignIn(): GoogleSignInClient {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.server_client_id))
             .requestEmail()
             .build()
-
         return GoogleSignIn.getClient(this, gso)
     }
 
@@ -161,7 +162,7 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == RC_SIGN_IN) {
+        if (requestCode == RC_SIGN_IN && appManager.account == null) {
             val task =
                 GoogleSignIn.getSignedInAccountFromIntent(data)
             handleSignInResult(task)
@@ -169,16 +170,21 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
     }
 
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
-        try {
-            appManager.account =
-                completedTask.getResult(ApiException::class.java)
-        } catch (e: ApiException) {
-            // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            Timber.w("signInResult:failed code=" + e.statusCode)
+        if (appManager.account == null) {
+            if (onboardingSteps[currentStepIndex].tag == "start")
+                onboardingSteps[currentStepIndex].fragment.updateUi()
+        } else {
+            try {
+                appManager.account =
+                    completedTask.getResult(ApiException::class.java)
+            } catch (e: ApiException) {
+                // The ApiException status code indicates the detailed failure reason.
+                // Please refer to the GoogleSignInStatusCodes class reference for more information.
+                Timber.w("signInResult:failed code=" + e.statusCode)
+            }
+            if (onboardingSteps[currentStepIndex].tag == "start")
+                onboardingSteps[currentStepIndex].fragment.updateUi()
         }
-        if (onboardingSteps[currentStepIndex].tag == "start")
-            onboardingSteps[currentStepIndex].fragment.updateUi()
     }
 
     companion object {
