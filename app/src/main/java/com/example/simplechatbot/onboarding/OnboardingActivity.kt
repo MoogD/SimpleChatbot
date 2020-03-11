@@ -1,7 +1,9 @@
 package com.example.simplechatbot.onboarding
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
@@ -57,7 +59,7 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
         setSupportActionBar(toolbar)
 
         setupOnboardingSteps()
-
+        Timber.i("onboarding activity")
         if (savedInstanceState != null) {
             val fragment = supportFragmentManager.findFragmentById(R.id.container)
 
@@ -86,8 +88,11 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
         val onboadringPermissionFragment by lazy {
             OnboardingStep(
                 tag = "permission",
-                fragment = OnboardingPermissionFragment.newInstance(R.string.onboarding_start_title,
-                    R.string.onboarding_start_text)
+                fragment = OnboardingPermissionFragment.newInstance(
+                    R.string.onboarding_permission_title,
+                    R.string.onboarding_permission_text,
+                    permissions = createPermissionsList()
+                )
             )
         }
         onboardingSteps = arrayOf(
@@ -98,6 +103,8 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
 
     private fun loadCurrentStepFragment() {
         val currentStep = onboardingSteps[currentStepIndex]
+        Timber.i("tag: ${ currentStep.tag }")
+        Timber.i("fragment: ${ currentStep.fragment }")
 
         window.decorView.systemUiVisibility =
             window.decorView.systemUiVisibility xor View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
@@ -109,12 +116,12 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
             }
 
             supportFragmentManager.findFragmentByTag(currentStep.tag)?.let { newFragment ->
+                Timber.i("new Fragment $newFragment")
                 attach(newFragment)
                 show(newFragment)
             } ?: add(R.id.container, currentStep.fragment, currentStep.tag)
-            Timber.i("tag: ${ currentStep.tag }")
+            Timber.i("Fragment: ${ currentStep.fragment }")
             commitAllowingStateLoss()
-
             Timber.i("Visibility: ${ window.decorView.systemUiVisibility }")
             Timber.i("currentFragment loaded")
         }
@@ -159,6 +166,21 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
         return signInIntent
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when (requestCode) {
+            REQUEST_PERMISSIONS ->
+                onboardingSteps[currentStepIndex].fragment.let {
+                    (it as? OnboardingPermissionFragment)?.onPermissionsResult(grantResults)
+                }
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -170,22 +192,34 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
     }
 
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
-        if (appManager.account == null) {
-            if (onboardingSteps[currentStepIndex].tag == "start")
+        if (appManager.account != null) {
+            if (onboardingSteps[currentStepIndex].tag == "start") {
                 onboardingSteps[currentStepIndex].fragment.updateUi()
+                Timber.i("Run update UI, Not signes in")
+            }
         } else {
             try {
                 appManager.account =
                     completedTask.getResult(ApiException::class.java)
+
             } catch (e: ApiException) {
                 // The ApiException status code indicates the detailed failure reason.
                 // Please refer to the GoogleSignInStatusCodes class reference for more information.
                 Timber.w("signInResult:failed code=" + e.statusCode)
             }
-            if (onboardingSteps[currentStepIndex].tag == "start")
+            Timber.i("Run update UI")
+            if (onboardingSteps[currentStepIndex].tag == "start") {
+                signedIn = true
                 onboardingSteps[currentStepIndex].fragment.updateUi()
+            }
         }
     }
+
+    private fun createPermissionsList(): ArrayList<String> = arrayListOf(
+        Manifest.permission.RECORD_AUDIO,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    )
 
     companion object {
         const val REQUEST_PERMISSIONS: Int = 20001

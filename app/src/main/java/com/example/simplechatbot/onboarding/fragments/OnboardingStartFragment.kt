@@ -51,11 +51,13 @@ class OnboardingStartFragment : OnboardingBaseFragment() {
 
 
     override fun updateUi() {
+
         if (listener?.signedIn == true) {
             signed_in_text.text = "You are signed in as ${ appManager.account?.displayName }"
             next_button.isEnabled = true
             next_button.setOnClickListener {
-               listener?.onNextStep()
+                Timber.i("Running update UI")
+                listener?.onNextStep()
             }
         } else {
             signed_in_text.text = "Sign in failed"

@@ -11,5 +11,6 @@
     <string name="onboarding_start_title">Sign in</string>
     <string name="onboarding_start_text">The app needs to be prepared to use it!\n
         Please start by signing in with a Google Account </string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="onboarding_permission_title">Permission</string>
+    <string name="onboarding_permission_text">To use the app please accept following Permission</string>
 </resources>
