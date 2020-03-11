@@ -39,7 +39,7 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
     private var currentStepIndex: Int = 0
     private lateinit var onboardingSteps: Array<OnboardingStep>
     private lateinit var mGoogleSignInClient: GoogleSignInClient
-    private var signedIn = false
+    override var signedIn = false
 
     override fun androidInjector(): AndroidInjector<Any> {
         return androidInjector
@@ -170,18 +170,15 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
 
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
         try {
-            val account =
+            appManager.account =
                 completedTask.getResult(ApiException::class.java)
-
-            // Signed in successfully, show authenticated UI.
-//            updateUI(account)
-            signedIn = true
         } catch (e: ApiException) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
             Timber.w("signInResult:failed code=" + e.statusCode)
-//            updateUI(null)
         }
+        if (onboardingSteps[currentStepIndex].tag == "start")
+            onboardingSteps[currentStepIndex].fragment.updateUi()
     }
 
     companion object {

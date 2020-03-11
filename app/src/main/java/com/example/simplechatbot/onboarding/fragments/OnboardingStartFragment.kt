@@ -23,7 +23,6 @@ import timber.log.Timber
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
 class OnboardingStartFragment : OnboardingBaseFragment() {
-    var signedIn = false
     private var titleRes: Int? = null
     private var textRes: Int? = null
 
@@ -51,13 +50,15 @@ class OnboardingStartFragment : OnboardingBaseFragment() {
     }
 
 
-    fun updateUI(account: GoogleSignInAccount?) {
-        if (signedIn) {
-            signed_in_text.text = "You are signed in as ${ account?.displayName }"
+    override fun updateUi() {
+        if (listener?.signedIn == true) {
+            signed_in_text.text = "You are signed in as ${ appManager.account?.displayName }"
             next_button.isEnabled = true
             next_button.setOnClickListener {
                listener?.onNextStep()
             }
+        } else {
+            signed_in_text.text = "Sign in failed"
         }
     }
 

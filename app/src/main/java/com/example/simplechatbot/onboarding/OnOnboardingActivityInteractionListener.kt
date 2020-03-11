@@ -5,4 +5,5 @@ interface OnOnboardingActivityInteractionListener {
     fun checkPermissionsGranted(permissions: Array<String>): Boolean
     fun onPermissionsRequest(permissions: Array<String>)
     fun onSignIn()
+    var signedIn: Boolean
 }
