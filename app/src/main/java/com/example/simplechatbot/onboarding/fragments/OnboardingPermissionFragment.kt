@@ -42,11 +42,13 @@ class OnboardingPermissionFragment : OnboardingBaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Timber.i("Permission view created")
-        allow.setOnClickListener(::onAllowClick)
+        nextButton.isEnabled = true
+        nextButton.setOnClickListener(::onAllowClick)
     }
 
     override fun onResume() {
         super.onResume()
+        Timber.i("Permission onresume")
 
         permissions?.let {
             val granted = listener?.checkPermissionsGranted(it)
@@ -65,8 +67,7 @@ class OnboardingPermissionFragment : OnboardingBaseFragment() {
     fun onPermissionsResult(grantResults: IntArray) {
         if (grantResults.isNotEmpty()) {
             for (grantResult in grantResults) {
-                if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                } else {
+                if (grantResult != PackageManager.PERMISSION_GRANTED) {
                     snackbar = Snackbar.make(
                         allow,
                         "You can not use the app without permission",
@@ -84,8 +85,7 @@ class OnboardingPermissionFragment : OnboardingBaseFragment() {
                     break
                 }
             }
-
-
+            listener?.onNextStep()
         }
     }
 

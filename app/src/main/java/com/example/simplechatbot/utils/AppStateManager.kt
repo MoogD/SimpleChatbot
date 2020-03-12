@@ -12,6 +12,6 @@ interface AppStateManager {
     var locale: Locale
 
     interface App {
-        val onboardingIsDone: Boolean?
+        var onboardingIsDone: Boolean
     }
 }

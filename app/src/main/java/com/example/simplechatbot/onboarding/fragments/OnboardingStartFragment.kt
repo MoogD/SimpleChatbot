@@ -1,20 +1,13 @@
 package com.example.simplechatbot.onboarding.fragments
 
-import android.content.Intent
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import com.example.simplechatbot.R
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
 import kotlinx.android.synthetic.main.onboarding_start.*
 import timber.log.Timber
 
@@ -53,7 +46,6 @@ class OnboardingStartFragment : OnboardingBaseFragment() {
     override fun updateUi() {
 
         if (listener?.signedIn == true) {
-            signed_in_text.text = "You are signed in as ${ appManager.account?.displayName }"
             next_button.isEnabled = true
             next_button.setOnClickListener {
                 Timber.i("Running update UI")

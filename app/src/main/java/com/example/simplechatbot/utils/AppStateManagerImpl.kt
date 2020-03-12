@@ -6,21 +6,17 @@ import java.util.*
 
 class AppStateManagerImpl(val context: Context) : AppStateManager {
 
-    var isOnboardingInitialized = false
-    var isAccountInitialized = false
-    override var account: GoogleSignInAccount?
-        get() = if (isAccountInitialized) account else null
+    override var account: GoogleSignInAccount? = null
+        get() = field
         set(value) {
-            account = value
-            isAccountInitialized = true
+            field = value
         }
 
-    override val app: AppStateManager.App = object : AppStateManager.App {
-        override var onboardingIsDone: Boolean
-            get() = if (isOnboardingInitialized) onboardingIsDone else false
+    override var app: AppStateManager.App = object : AppStateManager.App {
+        override var onboardingIsDone: Boolean = false
+            get() = field
             set(value) {
-                onboardingIsDone = value
-                isOnboardingInitialized = true
+                field = value
             }
     }
     override var locale: Locale
