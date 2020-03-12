@@ -131,7 +131,6 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
         } else {
             container.visibility = View.INVISIBLE
             appManager.app.onboardingIsDone = true
-//            appManager.account = account
             startActivity(MainActivity.intent(context))
             finish()
         }
