@@ -1,6 +1,7 @@
 package com.example.simplechatbot.onboarding.fragments
 
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -27,7 +28,6 @@ class OnboardingStartFragment : OnboardingBaseFragment() {
         }
     }
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -41,7 +41,6 @@ class OnboardingStartFragment : OnboardingBaseFragment() {
             listener?.onSignIn()
         }
     }
-
 
     override fun updateUi() {
 

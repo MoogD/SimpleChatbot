@@ -38,6 +38,7 @@ class OnboardingPermissionFragment : OnboardingBaseFragment() {
     ): View? =
         inflater.inflate(R.layout.onboarding_permissions, container, false)
 
+    override fun updateUi() { }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

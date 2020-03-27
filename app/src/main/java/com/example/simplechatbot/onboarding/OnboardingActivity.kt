@@ -3,6 +3,7 @@ package com.example.simplechatbot.onboarding
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
@@ -15,6 +16,7 @@ import com.example.simplechatbot.R
 import com.example.simplechatbot.annotationclasses.ApplicationContext
 import com.example.simplechatbot.onboarding.fragments.OnboardingPermissionFragment
 import com.example.simplechatbot.onboarding.fragments.OnboardingStartFragment
+import com.example.simplechatbot.utils.Constants
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -23,7 +25,7 @@ import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.Task
-import dagger.android.HasAndroidInjector
+import com.google.gson.GsonBuilder
 
 import kotlinx.android.synthetic.main.activity_onboarding.*
 import timber.log.Timber
@@ -35,7 +37,7 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
     @field :[Inject ApplicationContext]
     internal lateinit var context: Context
 
-
+    private lateinit var sharedPreferences: SharedPreferences
     private var currentStepIndex: Int = 0
     private lateinit var onboardingSteps: Array<OnboardingStep>
     private lateinit var googleSignInClient: GoogleSignInClient
@@ -49,18 +51,10 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
         setSupportActionBar(toolbar)
-
+        sharedPreferences = context.getSharedPreferences("APP_SETTINGS", Context.MODE_PRIVATE)
         setupOnboardingSteps()
         Timber.i("onboarding activity")
-        if (savedInstanceState != null) {
-            val fragment = supportFragmentManager.findFragmentById(R.id.container)
-
-            onboardingSteps.forEachIndexed { i, step ->
-                if (fragment?.tag == step.tag) {
-                    currentStepIndex = i
-                }
-            }
-        }
+        currentStepIndex = savedInstanceState?.getInt("CURRENT_STEP_INDEX") ?: 0
 
         googleSignInClient = configureSignIn()
 
@@ -68,8 +62,14 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
         Timber.i("onCreate Finished")
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState?.run {
+            putInt("CURRENT_STEP_INDEX", currentStepIndex)
+        }
+        super.onSaveInstanceState(outState)
+    }
 
-    fun setupOnboardingSteps() {
+    private fun setupOnboardingSteps() {
         val onboardingStartFragment by lazy {
             OnboardingStep(
                 tag = "start",
@@ -119,7 +119,7 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
             loadCurrentStepFragment()
         } else {
             container.visibility = View.INVISIBLE
-            appManager.app.onboardingIsDone = true
+            sharedPreferences.edit().putBoolean(Constants.IS_ONBOARDING_DONE, true).apply()
             startActivity(MainActivity.intent(context))
             finish()
         }
@@ -165,7 +165,14 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
     )
 
     override fun onSignIn() {
-        signIn(googleSignInClient)
+        if (!sharedPreferences.contains("ACCOUNT")) {
+            signIn(googleSignInClient)
+        } else {
+            Timber.i("Allready logged in!")
+            signedIn = true
+            onboardingSteps[currentStepIndex].fragment.updateUi()
+        }
+
     }
 
     fun configureSignIn(): GoogleSignInClient {
@@ -197,8 +204,10 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
 
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
         try {
-            appManager.account =
-                completedTask.getResult(ApiException::class.java)
+            val account = GsonBuilder()
+                .create()
+                .toJson(completedTask.getResult(ApiException::class.java))
+            sharedPreferences.edit().putString("ACCOUNT", account).apply()
             signedIn = true
         } catch (e: ApiException) {
             Timber.w("signInResult:failed code=" + e.statusCode)

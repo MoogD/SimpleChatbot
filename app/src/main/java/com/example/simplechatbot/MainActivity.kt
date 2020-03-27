@@ -2,11 +2,13 @@ package com.example.simplechatbot
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.example.simplechatbot.annotationclasses.ApplicationContext
 import com.example.simplechatbot.onboarding.OnboardingActivity
+import com.example.simplechatbot.utils.Constants
 import dagger.android.AndroidInjection
 import dagger.android.AndroidInjector
 import dagger.android.HasAndroidInjector
@@ -15,22 +17,19 @@ import timber.log.Timber
 import javax.inject.Inject
 
 
-class MainActivity : BaseActivity(), HasAndroidInjector {
+class MainActivity : BaseActivity() {
 
 
     @field :[Inject ApplicationContext]
     internal lateinit var context: Context
     private var isListening = false
 
-
-    override fun androidInjector(): AndroidInjector<Any> {
-        return androidInjector
-    }
-
+    private lateinit var sharedPref: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
+
+        sharedPref = context.getSharedPreferences("APP_SETTINGS", Context.MODE_PRIVATE)
 
         setContentView(R.layout.activity_main)
         listeningButton.setOnClickListener(::onListeningClicked)
@@ -39,7 +38,8 @@ class MainActivity : BaseActivity(), HasAndroidInjector {
 
     override fun onResume() {
         super.onResume()
-        if (!appManager.app.onboardingIsDone) {
+        Timber.i("${ sharedPref.getBoolean(Constants.IS_ONBOARDING_DONE, false)}")
+        if (!sharedPref.getBoolean(Constants.IS_ONBOARDING_DONE, false)) {
             startActivity(OnboardingActivity.intent(context))
             finish()
         }
