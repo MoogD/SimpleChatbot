@@ -5,7 +5,6 @@ buildscript {
     ext.androidMaterialVersion = '1.1.0-alpha01'
     ext.toolsBuildGradleVersion = '3.5.3'
     ext.googleAPIClient = '1.30.5'
-    ext.grpcVersion ='1.27.2'
     ext.timberVersion = '4.7.1'
     ext.daggerVersion = '2.24'
 

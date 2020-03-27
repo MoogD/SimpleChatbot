@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 abstract class OnboardingBaseFragment: Fragment() {
 
-    internal var listener: OnOnboardingActivityInteractionListener? = null
+    private var listener: OnOnboardingActivityInteractionListener? = null
 
     @Inject
     lateinit var appManager: AppStateManager
@@ -26,27 +26,10 @@ abstract class OnboardingBaseFragment: Fragment() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        if (getContext() is OnOnboardingActivityInteractionListener) {
-            listener = getContext() as OnOnboardingActivityInteractionListener
-        } else {
-            throw RuntimeException(context.toString() + " must implement OnOnboardingActivityInteractionListener")
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        listener = null
-    }
-
     override fun onDetach() {
         super.onDetach()
         listener = null
     }
 
-    open fun updateUi() {
-
-    }
+    abstract fun updateUi()
 }

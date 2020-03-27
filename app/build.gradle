@@ -3,13 +3,28 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+
 android {
     compileSdkVersion 29
+
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['storeFile'] ? keystoreProperties['storeFile'] : "../../keystore.jks")
+            storePassword keystoreProperties['storePassword'] ? keystoreProperties['storePassword'] : System.getenv("KEYSTORE_PASS")
+            keyAlias keystoreProperties['keyAlias'] ? keystoreProperties['keyAlias'] : System.getenv("ALIAS_NAME")
+            keyPassword keystoreProperties['keyPassword'] ? keystoreProperties['keyPassword'] : System.getenv("ALIAS_PASS")
+        }
+    }
+
     buildToolsVersion "29.0.1"
 
     defaultConfig {
         applicationId "com.example.simplechatbot"
-        minSdkVersion 26
+        minSdkVersion 27
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -45,23 +60,26 @@ android {
 }
 
 dependencies {
+    implementation ('com.google.auth:google-auth-library-oauth2-http:0.6.0') {
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
+    }
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'androidx.core:core-ktx:1.0.2'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'com.google.android.material:material:1.1.0'
+    implementation "com.google.android.material:material:$androidMaterialVersion"
+
+    // Unit tests
     testImplementation 'junit:junit:4.12'
+
+    // Android tests
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation "com.google.android.material:material:$androidMaterialVersion"
 
     implementation "com.jakewharton.timber:timber:$timberVersion"
 
     implementation "com.google.api-client:google-api-client:$googleAPIClient"
-    implementation "io.grpc:grpc-okhttp:$grpcVersion"
-    implementation "io.grpc:grpc-protobuf-lite:$grpcVersion"
-    implementation "io.grpc:grpc-stub:$grpcVersion"
     implementation 'com.google.android.gms:play-services-auth:17.0.0'
 
     // dagger

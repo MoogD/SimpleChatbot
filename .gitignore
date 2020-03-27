@@ -12,3 +12,13 @@
 /captures
 .externalNativeBuild
 .cxx
+
+# Built application files
+*.apk
+*.ap_
+*.aab
+
+# Keystore files
+*.jks
+*.keystore
+keystore.properties

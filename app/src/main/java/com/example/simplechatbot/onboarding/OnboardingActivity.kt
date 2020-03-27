@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
@@ -24,16 +23,13 @@ import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.Task
-import dagger.android.AndroidInjection
-import dagger.android.AndroidInjector
 import dagger.android.HasAndroidInjector
 
 import kotlinx.android.synthetic.main.activity_onboarding.*
 import timber.log.Timber
 import javax.inject.Inject
 
-class OnboardingActivity : BaseActivity(), HasAndroidInjector,
-    OnOnboardingActivityInteractionListener {
+class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListener {
 
 
     @field :[Inject ApplicationContext]
@@ -42,21 +38,14 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
 
     private var currentStepIndex: Int = 0
     private lateinit var onboardingSteps: Array<OnboardingStep>
-    private lateinit var mGoogleSignInClient: GoogleSignInClient
-    private var account: GoogleSignInAccount? = null
+    private lateinit var googleSignInClient: GoogleSignInClient
     override var signedIn = false
 
-    override fun androidInjector(): AndroidInjector<Any> {
-        return androidInjector
-    }
-
     init {
-        // Enable VectorDrawables on devices below Android 5
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
         setSupportActionBar(toolbar)
@@ -73,7 +62,7 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
             }
         }
 
-        mGoogleSignInClient = configureSignIn()
+        googleSignInClient = configureSignIn()
 
         loadCurrentStepFragment()
         Timber.i("onCreate Finished")
@@ -176,20 +165,20 @@ class OnboardingActivity : BaseActivity(), HasAndroidInjector,
     )
 
     override fun onSignIn() {
-        signIn(mGoogleSignInClient)
+        signIn(googleSignInClient)
     }
 
     fun configureSignIn(): GoogleSignInClient {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        val googleSignInOption = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.server_client_id))
             .requestEmail()
             .requestScopes(Scope(Scopes.APP_STATE),Scope(Scopes.PROFILE))
             .build()
-        return GoogleSignIn.getClient(this, gso)
+        return GoogleSignIn.getClient(this, googleSignInOption)
     }
 
-    private fun signIn(mGoogleSignInClient: GoogleSignInClient): Intent {
-        val signInIntent: Intent = mGoogleSignInClient.getSignInIntent()
+    private fun signIn(googleSignInClient: GoogleSignInClient): Intent {
+        val signInIntent: Intent = googleSignInClient.getSignInIntent()
         startActivityForResult(signInIntent,
             RC_SIGN_IN
         )
