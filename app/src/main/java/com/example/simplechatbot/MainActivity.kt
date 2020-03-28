@@ -5,13 +5,9 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
-import androidx.recyclerview.widget.RecyclerView
 import com.example.simplechatbot.annotationclasses.ApplicationContext
 import com.example.simplechatbot.onboarding.OnboardingActivity
 import com.example.simplechatbot.utils.Constants
-import dagger.android.AndroidInjection
-import dagger.android.AndroidInjector
-import dagger.android.HasAndroidInjector
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 import javax.inject.Inject

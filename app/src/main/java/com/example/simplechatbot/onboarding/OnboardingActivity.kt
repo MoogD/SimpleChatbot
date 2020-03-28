@@ -1,21 +1,21 @@
 package com.example.simplechatbot.onboarding
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.example.simplechatbot.BaseActivity
 import com.example.simplechatbot.MainActivity
 import com.example.simplechatbot.R
 import com.example.simplechatbot.annotationclasses.ApplicationContext
 import com.example.simplechatbot.onboarding.fragments.OnboardingPermissionFragment
-import com.example.simplechatbot.onboarding.fragments.OnboardingStartFragment
+import com.example.simplechatbot.onboarding.fragments.OnboardingViewModel
 import com.example.simplechatbot.utils.Constants
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -38,23 +38,35 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
     internal lateinit var context: Context
 
     private lateinit var sharedPreferences: SharedPreferences
-    private var currentStepIndex: Int = 0
-    private lateinit var onboardingSteps: Array<OnboardingStep>
     private lateinit var googleSignInClient: GoogleSignInClient
     override var signedIn = false
 
-    init {
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+    private var currentStep: OnboardingStep? = null
+
+    val onboardingViewModel: OnboardingViewModel by lazy {
+        ViewModelProviders.of(this).get(OnboardingViewModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_onboarding)
         setSupportActionBar(toolbar)
+
+        onboardingViewModel.currentStep.observe(this, Observer { newStep ->
+            if (newStep != null) {
+                currentStep = newStep
+                loadCurrentStepFragment()
+            } else {
+                container.visibility = View.INVISIBLE
+                sharedPreferences.edit().putBoolean(Constants.IS_ONBOARDING_DONE, true).apply()
+                startActivity(MainActivity.intent(context))
+                finish()
+            }
+        })
+
         sharedPreferences = context.getSharedPreferences("APP_SETTINGS", Context.MODE_PRIVATE)
-        setupOnboardingSteps()
         Timber.i("onboarding activity")
-        currentStepIndex = savedInstanceState?.getInt("CURRENT_STEP_INDEX") ?: 0
 
         googleSignInClient = configureSignIn()
 
@@ -62,39 +74,9 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
         Timber.i("onCreate Finished")
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState?.run {
-            putInt("CURRENT_STEP_INDEX", currentStepIndex)
-        }
-        super.onSaveInstanceState(outState)
-    }
 
-    private fun setupOnboardingSteps() {
-        val onboardingStartFragment by lazy {
-            OnboardingStep(
-                tag = "start",
-                fragment = OnboardingStartFragment.newInstance(R.string.onboarding_start_title,
-                    R.string.onboarding_start_text)
-            )
-        }
-        val onboadringPermissionFragment by lazy {
-            OnboardingStep(
-                tag = "permission",
-                fragment = OnboardingPermissionFragment.newInstance(
-                    R.string.onboarding_permission_title,
-                    R.string.onboarding_permission_text,
-                    permissions = createPermissionsList()
-                )
-            )
-        }
-        onboardingSteps = arrayOf(
-            onboardingStartFragment,
-            onboadringPermissionFragment
-        )
-    }
 
     private fun loadCurrentStepFragment() {
-        val currentStep = onboardingSteps[currentStepIndex]
 
         window.decorView.systemUiVisibility =
             window.decorView.systemUiVisibility xor View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
@@ -105,24 +87,16 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
                 detach(previousFragment)
             }
 
-            supportFragmentManager.findFragmentByTag(currentStep.tag)?.let { newFragment ->
+            supportFragmentManager.findFragmentByTag(currentStep?.tag)?.let { newFragment ->
                 attach(newFragment)
                 show(newFragment)
-            } ?: add(R.id.container, currentStep.fragment, currentStep.tag)
+            } ?: currentStep?.fragment?.let { add(R.id.container, it, currentStep?.tag) }
             commitAllowingStateLoss()
         }
     }
 
     override fun onNextStep(): Boolean {
-        if (currentStepIndex < onboardingSteps.size - 1) {
-            currentStepIndex++
-            loadCurrentStepFragment()
-        } else {
-            container.visibility = View.INVISIBLE
-            sharedPreferences.edit().putBoolean(Constants.IS_ONBOARDING_DONE, true).apply()
-            startActivity(MainActivity.intent(context))
-            finish()
-        }
+        onboardingViewModel.onNextStep()
         return true
     }
 
@@ -152,17 +126,11 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
 
         when (requestCode) {
             REQUEST_PERMISSIONS ->
-                onboardingSteps[currentStepIndex].fragment.let {
+                currentStep?.fragment.let {
                     (it as? OnboardingPermissionFragment)?.onPermissionsResult(grantResults)
                 }
         }
     }
-
-    private fun createPermissionsList(): ArrayList<String> = arrayListOf(
-        Manifest.permission.RECORD_AUDIO,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        Manifest.permission.READ_EXTERNAL_STORAGE
-    )
 
     override fun onSignIn() {
         if (!sharedPreferences.contains("ACCOUNT")) {
@@ -170,7 +138,7 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
         } else {
             Timber.i("Allready logged in!")
             signedIn = true
-            onboardingSteps[currentStepIndex].fragment.updateUi()
+            currentStep?.fragment?.updateUi()
         }
 
     }
@@ -207,13 +175,16 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
             val account = GsonBuilder()
                 .create()
                 .toJson(completedTask.getResult(ApiException::class.java))
-            sharedPreferences.edit().putString("ACCOUNT", account).apply()
+            sharedPreferences
+                .edit()
+                .putString("ACCOUNT", account)
+                .apply()
             signedIn = true
         } catch (e: ApiException) {
             Timber.w("signInResult:failed code=" + e.statusCode)
         }
-        if (onboardingSteps[currentStepIndex].tag == "start") {
-            onboardingSteps[currentStepIndex].fragment.updateUi()
+        if (currentStep?.tag == "start") {
+            currentStep?.fragment?.updateUi()
         }
     }
 
