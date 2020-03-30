@@ -2,7 +2,6 @@ package com.example.simplechatbot.onboarding
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
@@ -11,21 +10,18 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.simplechatbot.BaseActivity
-import com.example.simplechatbot.MainActivity
+import com.example.simplechatbot.main.MainActivity
 import com.example.simplechatbot.R
 import com.example.simplechatbot.annotationclasses.ApplicationContext
 import com.example.simplechatbot.onboarding.fragments.OnboardingPermissionFragment
 import com.example.simplechatbot.onboarding.fragments.OnboardingViewModel
-import com.example.simplechatbot.utils.Constants
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.Scopes
-import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.Task
-import com.google.gson.GsonBuilder
 
 import kotlinx.android.synthetic.main.activity_onboarding.*
 import timber.log.Timber
@@ -37,7 +33,6 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
     @field :[Inject ApplicationContext]
     internal lateinit var context: Context
 
-    private lateinit var sharedPreferences: SharedPreferences
     private lateinit var googleSignInClient: GoogleSignInClient
     override var signedIn = false
 
@@ -59,19 +54,21 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
                 loadCurrentStepFragment()
             } else {
                 container.visibility = View.INVISIBLE
-                sharedPreferences.edit().putBoolean(Constants.IS_ONBOARDING_DONE, true).apply()
+                onboardingViewModel.finishFTU()
                 startActivity(MainActivity.intent(context))
                 finish()
             }
         })
 
-        sharedPreferences = context.getSharedPreferences("APP_SETTINGS", Context.MODE_PRIVATE)
+        onboardingViewModel.signedIn.observe(this, Observer { newBoolean ->
+            signedIn = newBoolean
+        })
+
         Timber.i("onboarding activity")
 
         googleSignInClient = configureSignIn()
 
         loadCurrentStepFragment()
-        Timber.i("onCreate Finished")
     }
 
 
@@ -133,14 +130,12 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
     }
 
     override fun onSignIn() {
-        if (!sharedPreferences.contains("ACCOUNT")) {
+        if (!signedIn) {
             signIn(googleSignInClient)
         } else {
             Timber.i("Allready logged in!")
-            signedIn = true
             currentStep?.fragment?.updateUi()
         }
-
     }
 
     fun configureSignIn(): GoogleSignInClient {
@@ -154,9 +149,8 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
 
     private fun signIn(googleSignInClient: GoogleSignInClient): Intent {
         val signInIntent: Intent = googleSignInClient.getSignInIntent()
-        startActivityForResult(signInIntent,
-            RC_SIGN_IN
-        )
+
+        startActivityForResult(signInIntent, RC_SIGN_IN)
         return signInIntent
     }
 
@@ -171,18 +165,7 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
     }
 
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
-        try {
-            val account = GsonBuilder()
-                .create()
-                .toJson(completedTask.getResult(ApiException::class.java))
-            sharedPreferences
-                .edit()
-                .putString("ACCOUNT", account)
-                .apply()
-            signedIn = true
-        } catch (e: ApiException) {
-            Timber.w("signInResult:failed code=" + e.statusCode)
-        }
+       onboardingViewModel.setAccount(completedTask)
         if (currentStep?.tag == "start") {
             currentStep?.fragment?.updateUi()
         }

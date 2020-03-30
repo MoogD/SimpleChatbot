@@ -1,4 +1,4 @@
-package com.example.simplechatbot
+package com.example.simplechatbot.main
 
 import dagger.Module
 

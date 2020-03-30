@@ -1,59 +1,72 @@
-package com.example.simplechatbot
+package com.example.simplechatbot.main
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.example.simplechatbot.BaseActivity
+import com.example.simplechatbot.R
 import com.example.simplechatbot.annotationclasses.ApplicationContext
 import com.example.simplechatbot.onboarding.OnboardingActivity
-import com.example.simplechatbot.utils.Constants
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 import javax.inject.Inject
 
 
-class MainActivity : BaseActivity() {
+class MainActivity : BaseActivity(), MainView {
 
 
     @field :[Inject ApplicationContext]
     internal lateinit var context: Context
     private var isListening = false
 
-    private lateinit var sharedPref: SharedPreferences
+    private val presenter = MainPresenterImpl(context)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sharedPref = context.getSharedPreferences("APP_SETTINGS", Context.MODE_PRIVATE)
 
         setContentView(R.layout.activity_main)
         listeningButton.setOnClickListener(::onListeningClicked)
         Timber.i("onCreate called")
     }
 
-    override fun onResume() {
-        super.onResume()
-        Timber.i("${ sharedPref.getBoolean(Constants.IS_ONBOARDING_DONE, false)}")
-        if (!sharedPref.getBoolean(Constants.IS_ONBOARDING_DONE, false)) {
-            startActivity(OnboardingActivity.intent(context))
-            finish()
-        }
+    override fun onStart() {
+        super.onStart()
+
+        presenter.bindView(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        presenter.unbindView()
     }
 
     fun onListeningClicked(view: View) {
-        isListening = !isListening
-        if (isListening) {
-            listeningButton.text = getString(R.string.listening_button_listening)
-            Timber.i("Start listening")
-        } else {
-            listeningButton.text = getString(R.string.listening_button)
-            Timber.i("Stop listening")
-        }
+        presenter.listeningPressed()
+    }
 
+    override fun startOnboarding() {
+        startActivity(OnboardingActivity.intent(context))
+        finish()
+    }
+
+    fun setAdapter(adapter: ListAdapter<ChatItem, RecyclerView.ViewHolder>) {
+        utteranceList.adapter = adapter
+    }
+
+    override fun updateChat(chatItems: List<ChatItem>) {
 
     }
 
+    override fun stopListening() {
+        isListening = false
+        listeningButton.text = getString(R.string.listening_button)
+        Timber.i("Stop listening")
+    }
 
     companion object {
         fun intent(context: Context) =
@@ -61,5 +74,4 @@ class MainActivity : BaseActivity() {
                 addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
             }
     }
-
 }

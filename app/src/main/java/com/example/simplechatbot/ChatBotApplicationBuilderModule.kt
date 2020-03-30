@@ -1,6 +1,8 @@
 package com.example.simplechatbot
 
 import com.example.simplechatbot.annotationclasses.PerActivity
+import com.example.simplechatbot.main.MainActivity
+import com.example.simplechatbot.main.MainActivityModule
 import com.example.simplechatbot.onboarding.OnboardingActivity
 import com.example.simplechatbot.onboarding.OnboardingActivityModule
 import dagger.Module
