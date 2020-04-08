@@ -13,6 +13,7 @@
         android:background="@color/grey"
         app:layout_constraintBottom_toTopOf="@id/listeningButton"
         app:layout_constraintTop_toTopOf="parent"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:layout_editor_absoluteX="1dp" />
 
     <com.google.android.material.button.MaterialButton

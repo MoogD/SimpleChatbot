@@ -1,4 +1,4 @@
-package com.example.simplechatbot.annotationclasses
+package com.example.simplechatbot.injections
 
 import javax.inject.Qualifier
 
