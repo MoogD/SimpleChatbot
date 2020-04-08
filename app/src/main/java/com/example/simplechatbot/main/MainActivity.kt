@@ -1,71 +1,130 @@
 package com.example.simplechatbot.main
 
+
+import ai.api.AIListener
+import ai.api.android.AIConfiguration
+import ai.api.android.AIService
+import ai.api.model.AIError
+import ai.api.model.AIResponse
+import ai.api.model.Result
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
+import androidx.core.app.ActivityCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import com.example.simplechatbot.BaseActivity
 import com.example.simplechatbot.R
-import com.example.simplechatbot.annotationclasses.ApplicationContext
+import com.example.simplechatbot.injections.ApplicationContext
 import com.example.simplechatbot.onboarding.OnboardingActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 import javax.inject.Inject
 
 
-class MainActivity : BaseActivity(), MainView {
-
+class MainActivity : BaseActivity(), AIListener {
 
     @field :[Inject ApplicationContext]
     internal lateinit var context: Context
-    private var isListening = false
 
-    private val presenter = MainPresenterImpl(context)
+    @Inject
+    lateinit var factory: ViewModelProvider.Factory
+
+    lateinit var mainViewModel: MainViewModel
+
+    private var chatListAdapter = ChatListAdapter()
+    private lateinit var config: AIConfiguration
+    private lateinit var aiService: AIService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        mainViewModel = ViewModelProviders.of(this, factory)[MainViewModel::class.java]
+        mainViewModel.checkOnboarding()
+        setupListener()
 
         setContentView(R.layout.activity_main)
         listeningButton.setOnClickListener(::onListeningClicked)
-        Timber.i("onCreate called")
+        utteranceList.adapter = chatListAdapter
+
+        config = AIConfiguration(
+            "b3e790d591064ff79c8124aa8115ed42",
+            ai.api.AIConfiguration.SupportedLanguages.English,
+            AIConfiguration.RecognitionEngine.System
+        )
+        aiService = AIService.getService(this, config)
+        aiService.setListener(this)
+
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        presenter.bindView(this)
+    private fun setupListener() {
+        mainViewModel.onboardingDone.observe(this, Observer{
+            if (!it) {
+                startOnboarding()
+            }
+        })
+        mainViewModel.isListening.observe(this, Observer {
+            if (it) {
+                startListening()
+            } else {
+                stopListening()
+            }
+        })
+        mainViewModel.conversationObservable.observe(this, Observer {
+            chatListAdapter.chatItemList = it
+        })
     }
 
-    override fun onStop() {
-        super.onStop()
-
-        presenter.unbindView()
+    private fun onListeningClicked(view: View) {
+        mainViewModel.changeListeningState()
+        listen()
     }
 
-    fun onListeningClicked(view: View) {
-        presenter.listeningPressed()
+    private fun listen() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            aiService.startListening()
+        }
     }
-
-    override fun startOnboarding() {
+    private fun startOnboarding() {
         startActivity(OnboardingActivity.intent(context))
         finish()
     }
 
-    fun setAdapter(adapter: ListAdapter<ChatItem, RecyclerView.ViewHolder>) {
-        utteranceList.adapter = adapter
+    private fun startListening() {
+        listeningButton.text = getString(R.string.listening_button_listening)
+        Timber.i("Start listening")
     }
 
-    override fun updateChat(chatItems: List<ChatItem>) {
-
-    }
-
-    override fun stopListening() {
-        isListening = false
+    private fun stopListening() {
         listeningButton.text = getString(R.string.listening_button)
         Timber.i("Stop listening")
+    }
+
+    override fun onResult(response: AIResponse?) {
+        mainViewModel.onResponse(response)
+    }
+
+    override fun onListeningStarted() {
+    }
+
+    override fun onAudioLevel(level: Float) {
+    }
+
+    override fun onError(error: AIError?) {
+        Timber.w("Listening error: %s", error!!.message)
+    }
+
+    override fun onListeningCanceled() {
+    }
+
+    override fun onListeningFinished() {
+        listeningButton.text = getString(R.string.listening_button)
     }
 
     companion object {
