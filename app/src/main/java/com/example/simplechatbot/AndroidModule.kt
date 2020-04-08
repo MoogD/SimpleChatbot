@@ -1,7 +1,7 @@
 package com.example.simplechatbot
 
 import android.content.Context
-import com.example.simplechatbot.annotationclasses.ApplicationContext
+import com.example.simplechatbot.injections.ApplicationContext
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

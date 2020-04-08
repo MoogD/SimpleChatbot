@@ -12,7 +12,6 @@ import androidx.annotation.StringRes
 import com.example.simplechatbot.R
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.onboarding_permissions.*
-import timber.log.Timber
 
 class OnboardingPermissionFragment : OnboardingBaseFragment() {
 
@@ -24,7 +23,6 @@ class OnboardingPermissionFragment : OnboardingBaseFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Timber.i("Permission onCreate")
         arguments?.apply {
             titleRes = getInt(ARG_TITLE_RES)
             textRes = getInt(ARG_TEXT_RES)
@@ -42,14 +40,12 @@ class OnboardingPermissionFragment : OnboardingBaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Timber.i("Permission view created")
         nextButton.isEnabled = true
         nextButton.setOnClickListener(::onAllowClick)
     }
 
     override fun onResume() {
         super.onResume()
-        Timber.i("Permission onresume")
 
         permissions?.let {
             val granted = listener?.checkPermissionsGranted(it)

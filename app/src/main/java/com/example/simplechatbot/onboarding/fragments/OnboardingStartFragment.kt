@@ -1,7 +1,5 @@
 package com.example.simplechatbot.onboarding.fragments
 
-
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -43,15 +41,10 @@ class OnboardingStartFragment : OnboardingBaseFragment() {
     }
 
     override fun updateUi() {
-
-        if (listener?.signedIn == true) {
-            next_button.isEnabled = true
-            next_button.setOnClickListener {
-                Timber.i("Running update UI")
-                listener?.onNextStep()
-            }
-        } else {
-            signed_in_text.text = "Sign in failed"
+        next_button.isEnabled = true
+        next_button.setOnClickListener {
+            Timber.i("Running update UI")
+            listener?.onNextStep()
         }
     }
 

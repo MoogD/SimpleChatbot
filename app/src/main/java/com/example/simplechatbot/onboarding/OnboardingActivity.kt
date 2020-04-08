@@ -8,46 +8,49 @@ import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.example.simplechatbot.BaseActivity
-import com.example.simplechatbot.main.MainActivity
 import com.example.simplechatbot.R
-import com.example.simplechatbot.annotationclasses.ApplicationContext
+import com.example.simplechatbot.injections.ApplicationContext
+import com.example.simplechatbot.main.MainActivity
 import com.example.simplechatbot.onboarding.fragments.OnboardingPermissionFragment
-import com.example.simplechatbot.onboarding.fragments.OnboardingViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.Scopes
-import com.google.android.gms.common.api.Scope
-import com.google.android.gms.tasks.Task
-
 import kotlinx.android.synthetic.main.activity_onboarding.*
-import timber.log.Timber
 import javax.inject.Inject
 
 class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListener {
 
-
     @field :[Inject ApplicationContext]
     internal lateinit var context: Context
 
-    private lateinit var googleSignInClient: GoogleSignInClient
     override var signedIn = false
 
     private var currentStep: OnboardingStep? = null
 
-    val onboardingViewModel: OnboardingViewModel by lazy {
-        ViewModelProviders.of(this).get(OnboardingViewModel::class.java)
-    }
+    @Inject
+    lateinit var factory: ViewModelProvider.Factory
+
+    lateinit var onboardingViewModel: OnboardingViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        onboardingViewModel = ViewModelProviders.of(
+            this,
+            factory
+        )[OnboardingViewModel::class.java]
+
         setContentView(R.layout.activity_onboarding)
         setSupportActionBar(toolbar)
 
+        setupObservers()
+
+        loadCurrentStepFragment()
+    }
+
+    private fun setupObservers() {
         onboardingViewModel.currentStep.observe(this, Observer { newStep ->
             if (newStep != null) {
                 currentStep = newStep
@@ -60,17 +63,18 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
             }
         })
 
-        onboardingViewModel.signedIn.observe(this, Observer { newBoolean ->
-            signedIn = newBoolean
+        onboardingViewModel.googleSignInClient.observe(this, Observer {
+            it?.let {
+                signIn(it)
+            } ?: currentStep?.fragment?.updateUi()
         })
 
-        Timber.i("onboarding activity")
-
-        googleSignInClient = configureSignIn()
-
-        loadCurrentStepFragment()
+        onboardingViewModel.signedIn.observe(this, Observer {
+            if (it) {
+                onLoginSuccess()
+            }
+        })
     }
-
 
 
     private fun loadCurrentStepFragment() {
@@ -130,21 +134,7 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
     }
 
     override fun onSignIn() {
-        if (!signedIn) {
-            signIn(googleSignInClient)
-        } else {
-            Timber.i("Allready logged in!")
-            currentStep?.fragment?.updateUi()
-        }
-    }
-
-    fun configureSignIn(): GoogleSignInClient {
-        val googleSignInOption = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.server_client_id))
-            .requestEmail()
-            .requestScopes(Scope(Scopes.APP_STATE),Scope(Scopes.PROFILE))
-            .build()
-        return GoogleSignIn.getClient(this, googleSignInOption)
+        onboardingViewModel.startSignIn()
     }
 
     private fun signIn(googleSignInClient: GoogleSignInClient): Intent {
@@ -158,15 +148,13 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == RC_SIGN_IN) {
-            val task =
+            onboardingViewModel.setAccount(
                 GoogleSignIn.getSignedInAccountFromIntent(data)
-            handleSignInResult(task)
+            )
         }
     }
-
-    private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
-       onboardingViewModel.setAccount(completedTask)
-        if (currentStep?.tag == "start") {
+    private fun onLoginSuccess() {
+        if (currentStep?.tag == OnboardingViewModel.LOGIN_FRAGMENT_TAG) {
             currentStep?.fragment?.updateUi()
         }
     }
