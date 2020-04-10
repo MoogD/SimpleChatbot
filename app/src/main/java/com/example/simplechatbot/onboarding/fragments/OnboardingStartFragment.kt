@@ -6,20 +6,27 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import com.example.simplechatbot.R
+import com.example.simplechatbot.onboarding.OnboardingViewModel
+import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.onboarding_start.*
-import timber.log.Timber
+import javax.inject.Inject
 
-
-/**
- * A simple [Fragment] subclass as the default destination in the navigation.
- */
-class OnboardingStartFragment : OnboardingBaseFragment() {
+class OnboardingStartFragment : Fragment() {
     private var titleRes: Int? = null
     private var textRes: Int? = null
 
+    @Inject
+    lateinit var factory: ViewModelProvider.Factory
+
+    private lateinit var onboardingViewModel: OnboardingViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AndroidSupportInjection.inject(this)
         arguments?.apply {
             titleRes = getInt(ARG_TITLE_RES)
             textRes = getInt(ARG_TEXT_RES)
@@ -34,17 +41,31 @@ class OnboardingStartFragment : OnboardingBaseFragment() {
         inflater.inflate(R.layout.onboarding_start, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Timber.i("onViewCreated called")
-        sign_in_button.setOnClickListener {
-            listener?.onSignIn()
-        }
+        sign_in_button.setOnClickListener(::onSignIn)
+
+        onboardingViewModel = ViewModelProviders.of(
+            requireActivity(),
+            factory
+        )[OnboardingViewModel::class.java]
+
+        setupObservers()
     }
 
-    override fun updateUi() {
+    private fun setupObservers() {
+        onboardingViewModel.signedIn.observe(this, Observer {
+            if (it) {
+                updateUi()
+            }
+        })
+    }
+    private fun onSignIn(view: View) {
+        onboardingViewModel.initSignIn()
+    }
+
+    private fun updateUi() {
         next_button.isEnabled = true
         next_button.setOnClickListener {
-            Timber.i("Running update UI")
-            listener?.onNextStep()
+            onboardingViewModel.onNextStep()
         }
     }
 

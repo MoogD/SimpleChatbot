@@ -2,11 +2,8 @@ package com.example.simplechatbot.onboarding
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
@@ -20,19 +17,17 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import kotlinx.android.synthetic.main.activity_onboarding.*
 import javax.inject.Inject
 
-class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListener {
+class OnboardingActivity : BaseActivity() {
 
     @field :[Inject ApplicationContext]
     internal lateinit var context: Context
-
-    override var signedIn = false
 
     private var currentStep: OnboardingStep? = null
 
     @Inject
     lateinit var factory: ViewModelProvider.Factory
 
-    lateinit var onboardingViewModel: OnboardingViewModel
+    private lateinit var onboardingViewModel: OnboardingViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,19 +58,18 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
             }
         })
 
+        onboardingViewModel.signedIn.observe(this, Observer {
+            if (!it) {
+                onboardingViewModel.startSignIn(context)
+            }
+        })
+
         onboardingViewModel.googleSignInClient.observe(this, Observer {
             it?.let {
                 signIn(it)
-            } ?: currentStep?.fragment?.updateUi()
-        })
-
-        onboardingViewModel.signedIn.observe(this, Observer {
-            if (it) {
-                onLoginSuccess()
             }
         })
     }
-
 
     private fun loadCurrentStepFragment() {
 
@@ -96,28 +90,6 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
         }
     }
 
-    override fun onNextStep(): Boolean {
-        onboardingViewModel.onNextStep()
-        return true
-    }
-
-    override fun checkPermissionsGranted(permissions: Array<String>): Boolean {
-        for (permission in permissions) {
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    permission
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return false
-            }
-        }
-        return true
-    }
-
-    override fun onPermissionsRequest(permissions: Array<String>) {
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSIONS)
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
@@ -133,15 +105,8 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
         }
     }
 
-    override fun onSignIn() {
-        onboardingViewModel.startSignIn()
-    }
-
-    private fun signIn(googleSignInClient: GoogleSignInClient): Intent {
-        val signInIntent: Intent = googleSignInClient.getSignInIntent()
-
-        startActivityForResult(signInIntent, RC_SIGN_IN)
-        return signInIntent
+    private fun signIn(googleSignInClient: GoogleSignInClient) {
+        startActivityForResult(googleSignInClient.signInIntent, RC_SIGN_IN)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -151,11 +116,6 @@ class OnboardingActivity : BaseActivity(), OnOnboardingActivityInteractionListen
             onboardingViewModel.setAccount(
                 GoogleSignIn.getSignedInAccountFromIntent(data)
             )
-        }
-    }
-    private fun onLoginSuccess() {
-        if (currentStep?.tag == OnboardingViewModel.LOGIN_FRAGMENT_TAG) {
-            currentStep?.fragment?.updateUi()
         }
     }
 

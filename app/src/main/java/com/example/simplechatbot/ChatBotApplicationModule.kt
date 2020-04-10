@@ -46,8 +46,7 @@ class ChatBotApplicationModule {
     @IntoMap
     @ViewModelKey(OnboardingViewModel::class)
     fun provideOnboardingViewModel(
-        preferenceHelper: PreferenceHelper,
-        @ApplicationContext context: Context
+        preferenceHelper: PreferenceHelper
     ): ViewModel =
-        OnboardingViewModel(preferenceHelper, context)
+        OnboardingViewModel(preferenceHelper)
 }

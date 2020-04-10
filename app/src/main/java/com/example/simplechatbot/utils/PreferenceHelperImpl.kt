@@ -20,10 +20,10 @@ class PreferenceHelperImpl @Inject constructor(val context: Context) : Preferenc
     }
 
     override fun isSignedIn(): Boolean =
-        sharedPreferences.contains(ACCOUUNT_KEY)
+        sharedPreferences.contains(ACCOUNT_KEY)
 
     override fun getAccount(): GoogleSignInAccount {
-        val account = sharedPreferences.getString(ACCOUUNT_KEY, null)
+        val account = sharedPreferences.getString(ACCOUNT_KEY, null)
         return GsonBuilder()
             .create()
             .fromJson(account, GoogleSignInAccount::class.java)
@@ -35,7 +35,7 @@ class PreferenceHelperImpl @Inject constructor(val context: Context) : Preferenc
             .toJson(account)
         sharedPreferences
             .edit()
-            .putString(ACCOUUNT_KEY, account)
+            .putString(ACCOUNT_KEY, account)
             .apply()
     }
 
@@ -43,6 +43,6 @@ class PreferenceHelperImpl @Inject constructor(val context: Context) : Preferenc
         const val APP_SETTINGS_KEY = "APP_SETTINGS_KEY"
 
         const val ONBOARDING_DONE_KEY = "ONBOARDING_DONE_KEY"
-        const val ACCOUUNT_KEY = "ACCOUNT_KEY"
+        const val ACCOUNT_KEY = "ACCOUNT_KEY"
     }
 }

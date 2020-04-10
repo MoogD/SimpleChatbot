@@ -1,8 +1,8 @@
 package com.example.simplechatbot.onboarding
 
-import com.example.simplechatbot.onboarding.fragments.OnboardingBaseFragment
+import androidx.fragment.app.Fragment
 
 data class OnboardingStep(
     val tag: String,
-    val fragment: OnboardingBaseFragment
+    val fragment: Fragment
 )

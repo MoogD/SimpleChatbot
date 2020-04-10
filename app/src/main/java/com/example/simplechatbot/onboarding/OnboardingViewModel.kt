@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.simplechatbot.R
-import com.example.simplechatbot.injections.ApplicationContext
 import com.example.simplechatbot.onboarding.fragments.OnboardingPermissionFragment
 import com.example.simplechatbot.onboarding.fragments.OnboardingStartFragment
 import com.example.simplechatbot.utils.PreferenceHelper
@@ -23,27 +22,20 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 class OnboardingViewModel @Inject constructor(
-    private val preferenceHelper: PreferenceHelper,
-    private val context: Context
+    private val preferenceHelper: PreferenceHelper
 ) : ViewModel() {
 
-//    @field :[Inject ApplicationContext]
-//    internal lateinit var context: Context
 
     private val onboardingSteps: Array<OnboardingStep> = setupOnboardingSteps()
 
     private var currentStepIndex: Int = 0
 
-    val currentStep: MutableLiveData<OnboardingStep> = MutableLiveData<OnboardingStep>()
+    val currentStep: MutableLiveData<OnboardingStep> =
+        MutableLiveData<OnboardingStep>(onboardingSteps[currentStepIndex])
 
     val googleSignInClient: MutableLiveData<GoogleSignInClient> = MutableLiveData()
 
-    val signedIn: MutableLiveData<Boolean> = MutableLiveData(false)
-
-    init {
-        currentStep.value = onboardingSteps[currentStepIndex]
-        signedIn.value = preferenceHelper.isSignedIn()
-    }
+    val signedIn: MutableLiveData<Boolean> = MutableLiveData()
 
     private fun setupOnboardingSteps(): Array<OnboardingStep>{
         val onboardingStartFragment by lazy {
@@ -71,20 +63,19 @@ class OnboardingViewModel @Inject constructor(
         )
     }
 
-    private fun configureSignIn(): GoogleSignInClient {
-        val googleSignInOption = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.server_client_id))
-            .requestEmail()
-            .requestScopes(Scope(Scopes.APP_STATE), Scope(Scopes.PROFILE))
-            .build()
-        return GoogleSignIn.getClient(context, googleSignInOption)
-    }
-
-    fun startSignIn() {
+    fun startSignIn(context: Context) {
         if (signedIn.value == true) {
             googleSignInClient.value = null
         } else {
-            googleSignInClient.value = configureSignIn()
+            val googleSignInOption =
+                GoogleSignInOptions
+                    .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(context.getString(R.string.server_client_id))
+                    .requestEmail()
+                    .requestScopes(Scope(Scopes.APP_STATE), Scope(Scopes.PROFILE))
+                    .build()
+            googleSignInClient.value =
+                GoogleSignIn.getClient(context, googleSignInOption)
         }
     }
 
@@ -96,17 +87,13 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
-
     private fun createPermissionsList(): ArrayList<String> = arrayListOf(
-        Manifest.permission.RECORD_AUDIO,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        Manifest.permission.READ_EXTERNAL_STORAGE
+        Manifest.permission.RECORD_AUDIO
     )
 
     fun finishFTU() {
         preferenceHelper.setOnboardingState(true)
     }
-
 
     fun setAccount(completedTask: Task<GoogleSignInAccount>) {
         try {
@@ -115,8 +102,12 @@ class OnboardingViewModel @Inject constructor(
             )
             signedIn.value = true
         } catch (e: ApiException) {
-            Timber.w("signInResult failed: code=%s", e.statusCode)
+            Timber.w("signIn failed: code=%s", e.statusCode)
         }
+    }
+
+    fun initSignIn() {
+        signedIn.value = preferenceHelper.isSignedIn()
     }
 
     companion object {

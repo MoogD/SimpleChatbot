@@ -9,11 +9,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import com.example.simplechatbot.R
+import com.example.simplechatbot.onboarding.OnboardingActivity
+import com.example.simplechatbot.onboarding.OnboardingViewModel
 import com.google.android.material.snackbar.Snackbar
+import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.onboarding_permissions.*
+import javax.inject.Inject
 
-class OnboardingPermissionFragment : OnboardingBaseFragment() {
+class OnboardingPermissionFragment : Fragment() {
 
     private var titleRes: Int? = null
     private var textRes: Int? = null
@@ -21,8 +30,14 @@ class OnboardingPermissionFragment : OnboardingBaseFragment() {
 
     private var snackbar: Snackbar? = null
 
+    @Inject
+    lateinit var factory: ViewModelProvider.Factory
+
+    private lateinit var onboardingViewModel: OnboardingViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AndroidSupportInjection.inject(this)
         arguments?.apply {
             titleRes = getInt(ARG_TITLE_RES)
             textRes = getInt(ARG_TEXT_RES)
@@ -36,10 +51,14 @@ class OnboardingPermissionFragment : OnboardingBaseFragment() {
     ): View? =
         inflater.inflate(R.layout.onboarding_permissions, container, false)
 
-    override fun updateUi() { }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        onboardingViewModel = ViewModelProviders.of(
+            requireActivity(),
+            factory
+        )[OnboardingViewModel::class.java]
+
         nextButton.isEnabled = true
         nextButton.setOnClickListener(::onAllowClick)
     }
@@ -48,16 +67,40 @@ class OnboardingPermissionFragment : OnboardingBaseFragment() {
         super.onResume()
 
         permissions?.let {
-            val granted = listener?.checkPermissionsGranted(it)
+            val granted = checkPermissionsGranted(it)
 
-            if (granted != null && granted)
-                listener?.onNextStep()
+            if (granted)
+                onboardingViewModel.onNextStep()
+        }
+    }
+    private fun checkPermissionsGranted(permissions: Array<String>): Boolean {
+        for (permission in permissions) {
+            if (context?.let {
+                    ContextCompat.checkSelfPermission(
+                        it,
+                        permission
+                    )
+                } != PackageManager.PERMISSION_GRANTED
+            ) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun onPermissionsRequest(permissions: Array<String>) {
+        activity?.let {
+            ActivityCompat.requestPermissions(
+                it,
+                permissions,
+                OnboardingActivity.REQUEST_PERMISSIONS
+            )
         }
     }
 
     private fun onAllowClick(view: View) {
         permissions?.let {
-            listener?.onPermissionsRequest(it)
+            onPermissionsRequest(it)
         } ?: throw Exception("There is no permissions in list to ask!")
     }
 
@@ -67,7 +110,7 @@ class OnboardingPermissionFragment : OnboardingBaseFragment() {
                 if (grantResult != PackageManager.PERMISSION_GRANTED) {
                     snackbar = Snackbar.make(
                         allow,
-                        "You can not use the app without permission",
+                        "You can not use the app without giving the permissions",
                         Snackbar.LENGTH_INDEFINITE
                     ).apply {
                         setAction("Open Settings") {
@@ -79,10 +122,8 @@ class OnboardingPermissionFragment : OnboardingBaseFragment() {
                         }
                         show()
                     }
-                    break
                 }
             }
-            listener?.onNextStep()
         }
     }
 
