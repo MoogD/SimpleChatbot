@@ -41,7 +41,7 @@ class OnboardingStartFragment : Fragment() {
         inflater.inflate(R.layout.onboarding_start, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        sign_in_button.setOnClickListener(::onSignIn)
+        signInButton.setOnClickListener(::onSignIn)
 
         onboardingViewModel = ViewModelProviders.of(
             requireActivity(),
@@ -63,8 +63,8 @@ class OnboardingStartFragment : Fragment() {
     }
 
     private fun updateUi() {
-        next_button.isEnabled = true
-        next_button.setOnClickListener {
+        nextButton.isEnabled = true
+        nextButton.setOnClickListener {
             onboardingViewModel.onNextStep()
         }
     }

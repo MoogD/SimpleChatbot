@@ -40,9 +40,9 @@ class PreferenceHelperImpl @Inject constructor(val context: Context) : Preferenc
     }
 
     companion object {
-        const val APP_SETTINGS_KEY = "APP_SETTINGS_KEY"
+        private const val APP_SETTINGS_KEY = "APP_SETTINGS_KEY"
 
-        const val ONBOARDING_DONE_KEY = "ONBOARDING_DONE_KEY"
-        const val ACCOUNT_KEY = "ACCOUNT_KEY"
+        private const val ONBOARDING_DONE_KEY = "ONBOARDING_DONE_KEY"
+        private const val ACCOUNT_KEY = "ACCOUNT_KEY"
     }
 }
