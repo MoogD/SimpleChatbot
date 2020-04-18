@@ -30,12 +30,12 @@ class PreferenceHelperImpl @Inject constructor(val context: Context) : Preferenc
     }
 
     override fun setAccount(account: GoogleSignInAccount) {
-        val account = GsonBuilder()
+        val googleAccount = GsonBuilder()
             .create()
             .toJson(account)
         sharedPreferences
             .edit()
-            .putString(ACCOUNT_KEY, account)
+            .putString(ACCOUNT_KEY, googleAccount)
             .apply()
     }
 

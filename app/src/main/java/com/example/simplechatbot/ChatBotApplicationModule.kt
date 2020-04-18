@@ -24,6 +24,7 @@ class ChatBotApplicationModule {
         @ApplicationContext context: Context
     ): PreferenceHelper = PreferenceHelperImpl(context)
 
+    @Suppress("UNCHECKED_CAST")
     @Provides
     @Singleton
     fun provideViewModelFactory(

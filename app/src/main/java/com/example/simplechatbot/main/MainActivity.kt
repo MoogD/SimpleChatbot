@@ -12,6 +12,7 @@ import com.example.simplechatbot.R
 import com.example.simplechatbot.injections.ApplicationContext
 import com.example.simplechatbot.onboarding.OnboardingActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -59,6 +60,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun onListeningClicked(view: View) {
+        Timber.i("$view was clicked")
         mainViewModel.startListening()
     }
 

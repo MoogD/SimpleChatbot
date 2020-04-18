@@ -13,6 +13,7 @@ import com.example.simplechatbot.R
 import com.example.simplechatbot.onboarding.OnboardingViewModel
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.onboarding_start.*
+import timber.log.Timber
 import javax.inject.Inject
 
 class OnboardingStartFragment : Fragment() {
@@ -59,6 +60,7 @@ class OnboardingStartFragment : Fragment() {
         })
     }
     private fun onSignIn(view: View) {
+        Timber.i("$view was clicked")
         onboardingViewModel.initSignIn()
     }
 

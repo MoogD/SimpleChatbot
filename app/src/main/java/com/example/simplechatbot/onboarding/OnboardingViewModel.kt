@@ -115,6 +115,7 @@ class OnboardingViewModel @Inject constructor(
         const val PERMISSION_FRAGMENT_TAG = "Permission"
     }
 
+    @Suppress("UNCHECKED_CAST")
     class Factory(val provider: Provider<OnboardingViewModel>) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T =
             provider.get() as T

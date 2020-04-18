@@ -20,6 +20,7 @@ import com.example.simplechatbot.onboarding.OnboardingViewModel
 import com.google.android.material.snackbar.Snackbar
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.onboarding_permissions.*
+import timber.log.Timber
 import javax.inject.Inject
 
 class OnboardingPermissionFragment : Fragment() {
@@ -99,6 +100,7 @@ class OnboardingPermissionFragment : Fragment() {
     }
 
     private fun onAllowClick(view: View) {
+        Timber.i("$view was clicked")
         permissions?.let {
             onPermissionsRequest(it)
         } ?: throw Exception("There is no permissions in list to ask!")

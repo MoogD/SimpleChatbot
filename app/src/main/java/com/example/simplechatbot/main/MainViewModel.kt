@@ -93,6 +93,7 @@ class MainViewModel @Inject constructor(
     companion object {
         private const val ACCESS_TOKEN = "b3e790d591064ff79c8124aa8115ed42"
     }
+    @Suppress("UNCHECKED_CAST")
     class Factory(val provider: Provider<MainViewModel>) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T =
             provider.get() as T
