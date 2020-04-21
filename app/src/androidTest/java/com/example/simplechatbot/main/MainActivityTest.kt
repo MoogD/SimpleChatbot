@@ -66,12 +66,12 @@ class MainActivityTest {
             }
         checkActivityStartView(utteranceList)
 
-        mainActivityScenario.onActivity{ activity: MainActivity? ->
-            activity?.let {
-                ViewModelProviders.of(it, it.factory)[MainViewModel::class.java]
-                    .onResult(provideAiResponse())
-            }
-        }
+//        mainActivityScenario.onActivity{ activity: MainActivity? ->
+//            activity?.let {
+//                ViewModelProviders.of(it, it.factory)[MainViewModel::class.java]
+//                    .onResult(provideAiResponse())
+//            }
+//        }
         checkViewAfterConversation(utteranceList)
 
         mainActivityScenario.close()
@@ -111,23 +111,23 @@ class MainActivityTest {
             .apply()
     }
 
-    private fun provideAiResponse(): AIResponse {
-        val date = Calendar.getInstance().time
-        val result = ai.api.model.Result()
-        result.action = "input.welcome"
-        result.resolvedQuery = "hello"
-        result.fulfillment = Fulfillment()
-        result.fulfillment.speech = "Hi! I can show you examples of helper intents. We recommend trying this sample on a phone so you can see all helper intents."
-        val status = Status()
-        status.code = 200
-        status.errorType = "success"
-        status.errorDetails = null
-        val response = AIResponse()
-        response.id = "ac2f20fd-830f-4976-ac13-4dccf4009bf7-266f04e0"
-        response.timestamp = date
-        response.result = result
-        response.status = status
-        response.sessionId = "89c81e1f-5728-4d6e-8ae0-1a07c097a211"
-        return  response
-    }
+//    private fun provideAiResponse(): AIResponse {
+//        val date = Calendar.getInstance().time
+//        val result = ai.api.model.Result()
+//        result.action = "input.welcome"
+//        result.resolvedQuery = "hello"
+//        result.fulfillment = Fulfillment()
+//        result.fulfillment.speech = "Hi! I can show you examples of helper intents. We recommend trying this sample on a phone so you can see all helper intents."
+//        val status = Status()
+//        status.code = 200
+//        status.errorType = "success"
+//        status.errorDetails = null
+//        val response = AIResponse()
+//        response.id = "ac2f20fd-830f-4976-ac13-4dccf4009bf7-266f04e0"
+//        response.timestamp = date
+//        response.result = result
+//        response.status = status
+//        response.sessionId = "89c81e1f-5728-4d6e-8ae0-1a07c097a211"
+//        return  response
+//    }
 }

@@ -38,7 +38,7 @@ class MainActivity : BaseActivity() {
         setContentView(R.layout.activity_main)
         listeningButton.setOnClickListener(::onListeningClicked)
         utteranceList.adapter = chatListAdapter
-        mainViewModel.prepareListening(context)
+//        mainViewModel.prepareListening(context)
     }
 
     private fun setupListener() {
@@ -61,7 +61,7 @@ class MainActivity : BaseActivity() {
 
     private fun onListeningClicked(view: View) {
         Timber.i("$view was clicked")
-        mainViewModel.startListening()
+        mainViewModel.startListening(context.applicationInfo.dataDir +"/$AUDIO_FILE_PATH")
     }
 
     private fun startOnboarding() {
@@ -78,6 +78,8 @@ class MainActivity : BaseActivity() {
     }
 
     companion object {
+        private const val AUDIO_FILE_PATH = "AudioFile.wav"
+
         fun intent(context: Context) =
             Intent(context, MainActivity::class.java).apply {
                 addFlags(

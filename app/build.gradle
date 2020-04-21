@@ -77,12 +77,14 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation "androidx.appcompat:appcompat:$androidxCoreVersion"
+    implementation "androidx.appcompat:appcompat:$androidxAppcomponentVersion"
     implementation "androidx.core:core-ktx:$androidxCoreVersion"
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintVersion"
     implementation "androidx.lifecycle:lifecycle-extensions:$androidxLifecycleVersion"
     implementation "com.google.android.material:material:$androidMaterialVersion"
     implementation "com.google.code.gson:gson:$gsonVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
 
     // Unit tests
     testImplementation "junit:junit:$junitVersion"
@@ -104,6 +106,10 @@ dependencies {
 
     implementation "com.google.api-client:google-api-client:$googleAPIClient"
     implementation "com.google.android.gms:play-services-auth:$googlePlayServicesVersion"
+    implementation "com.google.cloud:google-cloud-speech:$googleCloudSpeechVersion"
+    implementation "io.grpc:grpc-okhttp:$grpcVersion"
+    implementation "io.grpc:grpc-protobuf-lite:$grpcVersion"
+    implementation "io.grpc:grpc-stub:$grpcVersion"
 
     // dagger
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
