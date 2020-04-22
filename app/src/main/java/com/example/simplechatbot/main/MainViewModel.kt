@@ -3,18 +3,26 @@ package com.example.simplechatbot.main
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.simplechatbot.assistant.CredentialProvider
 import com.example.simplechatbot.assistant.MicrophoneListener
 import com.example.simplechatbot.assistant.MicrophoneListenerImpl
 import com.example.simplechatbot.assistant.SpeechAssistant
 import com.example.simplechatbot.utils.PreferenceHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Provider
 
 class MainViewModel @Inject constructor(
     private val preferenceHelper: PreferenceHelper,
-    private val speechAssistant: SpeechAssistant
+    private val speechAssistant: SpeechAssistant,
+    private val credentialProvider: CredentialProvider
 ): ViewModel() {
+    private val job = Job()
+    private val uiScope = CoroutineScope(Dispatchers.IO + job)
 
     var onboardingDone: MutableLiveData<Boolean> = MutableLiveData(false)
 
@@ -25,16 +33,19 @@ class MainViewModel @Inject constructor(
 
     private val listener: MicrophoneListener = MicrophoneListenerImpl()
 
-//    fun prepareListening(context: Context) {
-//
-//    }
+    init {
+        uiScope.launch {
+            val token = credentialProvider.provideCredentials()
+            speechAssistant.prepareSpeechAssistant(credentialProvider)
+        }
+    }
 
     fun startListening(path: String) {
         if (isListening.value == true) {
             listener.stopListening()
             val results = speechAssistant.translateFile(path)
             Timber.i("Results: $results")
-            results.forEach { result ->
+            results?.forEach { result ->
                 Timber.i("$result")
             }
             isListening.value = false

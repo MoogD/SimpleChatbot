@@ -3,10 +3,7 @@ package com.example.simplechatbot.assistant
 import android.content.Context
 import com.google.auth.oauth2.AccessToken
 import com.google.auth.oauth2.GoogleCredentials
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.io.InputStream
 import javax.inject.Inject
 
@@ -14,17 +11,18 @@ import javax.inject.Inject
 class CredentialProviderImpl @Inject constructor(
     private val context: Context
 ) : CredentialProvider {
-    private val job = Job()
-    private val uiScope = CoroutineScope(Dispatchers.Main + job)
+    var token: AccessToken? = null
 
     override fun provideCredentials(): GoogleCredentials? {
-        var token: AccessToken? = null
-        uiScope.launch {
-            val stream: InputStream =
-                context.assets.open("simplechatbot-b9313-8f52c1b81876.json")
-            val credentials: GoogleCredentials = GoogleCredentials.fromStream(stream)
-                .createScoped("https://www.googleapis.com/auth/cloud-platform")
+        val stream: InputStream =
+            context.assets.open("simplechatbot-b9313-8f52c1b81876.json")
+        val credentials: GoogleCredentials = GoogleCredentials.fromStream(stream)
+            .createScoped("https://www.googleapis.com/auth/cloud-platform")
+        try {
             token = credentials.refreshAccessToken()
+            Timber.i("Token refreshed")
+        } catch (e: IllegalStateException) {
+            Timber.w("Error refreshing token: $e")
         }
         return GoogleCredentials(token)
     }

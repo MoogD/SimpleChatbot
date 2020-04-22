@@ -10,14 +10,14 @@ ext {
     androidxLifecycleVersion = '2.2.0'
     coroutinesVersion = '1.3.2'
 
-    googleAPIClient = '1.30.5'
+    googleAPIClient = '1.30.9'
     googlePlayServicesVersion = '18.0.0'
     googleOauthVersion = '0.6.0'
     dialogFlowVersion = '1.0.0'
     aiApiSdkVersion = '2.0.7@aar'
     aiApiLibVersion = '1.6.12'
     googleCloudSpeechVersion = '1.22.6'
-    grpcVersion = '1.10.1'
+    grpcVersion = '1.28.1'
 
     junitVersion = '4.12'
     androidxTestVersion = '1.1.1'

@@ -30,9 +30,7 @@ class ChatBotApplicationModule {
 
     @Provides
     @Singleton
-    fun provideSpeechAssistant (
-        credentialProvider: CredentialProvider
-    ): SpeechAssistant = SpeechAssistantImpl(credentialProvider)
+    fun provideSpeechAssistant (): SpeechAssistant = SpeechAssistantImpl()
 
     @Provides
     @Singleton
@@ -56,9 +54,10 @@ class ChatBotApplicationModule {
     @ViewModelKey(MainViewModel::class)
     fun provideMainViewModel(
         preferenceHelper: PreferenceHelper,
-        speechAssistant: SpeechAssistant
+        speechAssistant: SpeechAssistant,
+        credentialProvider: CredentialProvider
     ): ViewModel =
-        MainViewModel(preferenceHelper, speechAssistant)
+        MainViewModel(preferenceHelper, speechAssistant, credentialProvider)
 
     @Provides
     @IntoMap
