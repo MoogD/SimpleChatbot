@@ -13,10 +13,9 @@ ext {
     googleAPIClient = '1.30.9'
     googlePlayServicesVersion = '18.0.0'
     googleOauthVersion = '0.6.0'
-    dialogFlowVersion = '1.0.0'
-    aiApiSdkVersion = '2.0.7@aar'
-    aiApiLibVersion = '1.6.12'
     googleCloudSpeechVersion = '1.22.6'
+    googleCloudNluVersion = '1.100.0'
+    googleCloudTtsVersion = '1.0.2'
     grpcVersion = '1.28.1'
 
     junitVersion = '4.12'

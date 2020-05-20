@@ -13,7 +13,7 @@ class ChatBotApplication : Application(), HasAndroidInjector {
     @Inject
     lateinit var androidInjector: DispatchingAndroidInjector<Any>
 
-    val component: ChatBotApplicationComponent by lazy {
+    private val component: ChatBotApplicationComponent by lazy {
         DaggerChatBotApplicationComponent
             .builder()
             .androidModule(

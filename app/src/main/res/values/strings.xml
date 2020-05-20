@@ -1,8 +1,9 @@
 <resources>
     <string name="server_client_id">770905780439-mn7frtue2cfma92emr5l0fo8o58u4gaj.apps.googleusercontent.com</string>
     <string name="app_name">SimpleChatbot</string>
-    <string name="listening_button">Start Listening</string>
-    <string name="listening_button_listening">Listening...</string>
+    <string name="listening_button">Say Hello Assistant</string>
+    <string name="listening_button_listening">Listening…</string>
+    <string name="listening_button_processing">Processing…</string>
     <string name="title_activity_onboarding">OnboardingActivity</string>
     <!-- Strings used for fragments for navigation -->
     <string name="next">Next</string>

@@ -11,8 +11,9 @@ class MicrophoneListenerImpl : MicrophoneListener {
     private fun prepareRecorder(path: String) {
         val file = prepareAudioFile(path)
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC)
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT)
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT)
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AMR_WB)
+        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB)
+        mediaRecorder.setAudioSamplingRate(16000)
         mediaRecorder.setOutputFile(file)
         mediaRecorder.prepare()
         isPrepared = true

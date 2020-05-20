@@ -1,9 +1,9 @@
 package com.example.simplechatbot.assistant
 
-import com.google.cloud.speech.v1p1beta1.SpeechRecognitionResult
+import com.google.api.gax.core.CredentialsProvider
 
 interface SpeechAssistant {
 
-    fun translateFile(path: String): List<SpeechRecognitionResult>?
-    fun prepareSpeechAssistant(credentialProvider: CredentialProvider)
+    suspend fun prepareSpeechAssistant(credentialProvider: CredentialsProvider)
+    suspend fun prepareResponse(inputPath: String, outputPath: String): AssistantIntent
 }

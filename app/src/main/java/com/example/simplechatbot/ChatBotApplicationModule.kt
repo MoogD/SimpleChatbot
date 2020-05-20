@@ -3,16 +3,22 @@ package com.example.simplechatbot
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.simplechatbot.assistant.CredentialProvider
 import com.example.simplechatbot.assistant.CredentialProviderImpl
+import com.example.simplechatbot.assistant.MicrophoneListener
+import com.example.simplechatbot.assistant.MicrophoneListenerImpl
 import com.example.simplechatbot.assistant.SpeechAssistant
 import com.example.simplechatbot.assistant.SpeechAssistantImpl
 import com.example.simplechatbot.injections.ApplicationContext
 import com.example.simplechatbot.injections.ViewModelKey
 import com.example.simplechatbot.main.MainViewModel
 import com.example.simplechatbot.onboarding.OnboardingViewModel
+import com.example.simplechatbot.utils.IntentMatcher
+import com.example.simplechatbot.utils.PathProvider
+import com.example.simplechatbot.utils.PathProviderImp
 import com.example.simplechatbot.utils.PreferenceHelper
 import com.example.simplechatbot.utils.PreferenceHelperImpl
+import com.example.simplechatbot.utils.PromptProvider
+import com.google.api.gax.core.CredentialsProvider
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoMap
@@ -24,13 +30,25 @@ class ChatBotApplicationModule {
 
     @Provides
     @Singleton
-    fun provideCredentialProvider (
+    fun provideCredentialProvider(
         @ApplicationContext context: Context
-    ): CredentialProvider = CredentialProviderImpl(context)
+    ): CredentialsProvider = CredentialProviderImpl(context)
+
+    @Provides
+    fun provideIntentMatcher(): IntentMatcher =
+        IntentMatcher
+
+    @Provides
+    fun providePromptProvider(): PromptProvider =
+        PromptProvider
 
     @Provides
     @Singleton
-    fun provideSpeechAssistant (): SpeechAssistant = SpeechAssistantImpl()
+    fun provideSpeechAssistant(
+        intentMatcher: IntentMatcher,
+        promptProvider: PromptProvider
+    ): SpeechAssistant =
+        SpeechAssistantImpl(intentMatcher, promptProvider)
 
     @Provides
     @Singleton
@@ -48,6 +66,15 @@ class ChatBotApplicationModule {
             return requireNotNull(providers[modelClass as Class<out ViewModel>]).get() as T
         }
     }
+    @Provides
+    @Singleton
+    fun providePathProvider(
+        @ApplicationContext context: Context
+    ): PathProvider = PathProviderImp(context)
+
+    @Provides
+    @Singleton
+    fun provideMicrophoneListener() : MicrophoneListener = MicrophoneListenerImpl()
 
     @Provides
     @IntoMap
@@ -55,9 +82,11 @@ class ChatBotApplicationModule {
     fun provideMainViewModel(
         preferenceHelper: PreferenceHelper,
         speechAssistant: SpeechAssistant,
-        credentialProvider: CredentialProvider
+        credentialProvider: CredentialsProvider,
+        pathProvider: PathProvider,
+        listener: MicrophoneListener
     ): ViewModel =
-        MainViewModel(preferenceHelper, speechAssistant, credentialProvider)
+        MainViewModel(preferenceHelper, speechAssistant, credentialProvider, pathProvider, listener)
 
     @Provides
     @IntoMap
