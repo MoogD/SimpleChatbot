@@ -1,9 +1,11 @@
 package com.example.simplechatbot.main
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
-import android.view.View
+import android.os.IBinder
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
@@ -12,9 +14,7 @@ import com.example.simplechatbot.R
 import com.example.simplechatbot.injections.ApplicationContext
 import com.example.simplechatbot.onboarding.OnboardingActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import timber.log.Timber
 import javax.inject.Inject
-
 
 class MainActivity : BaseActivity() {
 
@@ -28,6 +28,15 @@ class MainActivity : BaseActivity() {
 
     private var chatListAdapter = ChatListAdapter()
 
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceDisconnected(name: ComponentName?) {}
+
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as MainService.MainBinder
+            mainViewModel.setWuWListener(binder.getService())
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -36,32 +45,40 @@ class MainActivity : BaseActivity() {
         setupListener()
 
         setContentView(R.layout.activity_main)
-        listeningButton.setOnClickListener(::onListeningClicked)
         utteranceList.adapter = chatListAdapter
-//        mainViewModel.prepareListening(context)
+
+        Intent(this, MainService::class.java).also { intent ->
+            bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+        }
     }
 
     private fun setupListener() {
-        mainViewModel.onboardingDone.observe(this, Observer{
+        mainViewModel.onboardingDone.observe(this, Observer {
             if (!it) {
                 startOnboarding()
             }
         })
         mainViewModel.isListening.observe(this, Observer {
-            if (it) {
-                startListening()
-            } else {
-                stopListening()
+            when (it) {
+                null -> startProcessing()
+                true -> startListening()
+                false -> stopListening()
             }
         })
         mainViewModel.conversationObservable.observe(this, Observer {
             chatListAdapter.chatItemList = it
         })
+        mainViewModel.intent.observe(this, Observer {
+            if (it != null) {
+                stopListening()
+            }
+        })
     }
 
-    private fun onListeningClicked(view: View) {
-        Timber.i("$view was clicked")
-        mainViewModel.startListening(context.applicationInfo.dataDir +"/$AUDIO_FILE_PATH")
+    override fun onDestroy() {
+        unbindService(serviceConnection)
+        mainViewModel.onDestroy()
+        super.onDestroy()
     }
 
     private fun startOnboarding() {
@@ -73,13 +90,15 @@ class MainActivity : BaseActivity() {
         listeningButton.text = getString(R.string.listening_button_listening)
     }
 
+    private fun startProcessing() {
+        listeningButton.text = getString(R.string.listening_button_processing)
+    }
+
     private fun stopListening() {
         listeningButton.text = getString(R.string.listening_button)
     }
 
     companion object {
-        private const val AUDIO_FILE_PATH = "AudioFile.wav"
-
         fun intent(context: Context) =
             Intent(context, MainActivity::class.java).apply {
                 addFlags(
