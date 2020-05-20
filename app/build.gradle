@@ -66,14 +66,19 @@ android {
 
 }
 
+ant.importBuild 'src\\main\\Assets\\assets.xml'
+preBuild.dependsOn(list, checksum)
+clean.dependsOn(clean_assets)
+
 dependencies {
+    implementation project(':pocketsphinx')
+    // Google api clients
     implementation "com.google.api-client:google-api-client:$googleAPIClient"
-    implementation "com.google.cloud:google-cloud-dialogflow:$dialogFlowVersion"
-    implementation "ai.api:sdk:$aiApiSdkVersion"
-    implementation "ai.api:libai:$aiApiLibVersion"
+
     implementation ("com.google.auth:google-auth-library-oauth2-http:$googleOauthVersion") {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
@@ -107,6 +112,8 @@ dependencies {
     implementation "com.google.api-client:google-api-client:$googleAPIClient"
     implementation "com.google.android.gms:play-services-auth:$googlePlayServicesVersion"
     implementation "com.google.cloud:google-cloud-speech:$googleCloudSpeechVersion"
+    implementation "com.google.cloud:google-cloud-language:$googleCloudNluVersion"
+    implementation "com.google.cloud:google-cloud-texttospeech:$googleCloudTtsVersion"
     implementation "io.grpc:grpc-okhttp:$grpcVersion"
     implementation "io.grpc:grpc-stub:$grpcVersion"
 
