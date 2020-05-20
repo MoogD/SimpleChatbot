@@ -6,12 +6,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.simplechatbot.R
 
-
-class ChatListAdapter: RecyclerView.Adapter<ChatListAdapter.ViewHolder>() {
+class ChatListAdapter : RecyclerView.Adapter<ChatListAdapter.ViewHolder>() {
 
     var chatItemList: MutableList<ChatItem> = mutableListOf()
         set(value) {

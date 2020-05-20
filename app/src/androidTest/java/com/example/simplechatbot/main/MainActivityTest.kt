@@ -1,11 +1,7 @@
 package com.example.simplechatbot.main
 
-import ai.api.model.AIResponse
-import ai.api.model.Fulfillment
-import ai.api.model.Status
 import android.content.Context
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -14,16 +10,19 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsTestRule
-import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isEnabled
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.simplechatbot.R
 import com.example.simplechatbot.onboarding.OnboardingActivity
 import junit.framework.Assert.assertEquals
+import org.hamcrest.CoreMatchers.not
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.*
 
 private const val APP_SETTINGS_KEY = "APP_SETTINGS_KEY"
 
@@ -66,28 +65,7 @@ class MainActivityTest {
             }
         checkActivityStartView(utteranceList)
 
-//        mainActivityScenario.onActivity{ activity: MainActivity? ->
-//            activity?.let {
-//                ViewModelProviders.of(it, it.factory)[MainViewModel::class.java]
-//                    .onResult(provideAiResponse())
-//            }
-//        }
-        checkViewAfterConversation(utteranceList)
-
         mainActivityScenario.close()
-    }
-
-    private fun checkViewAfterConversation(utteranceList: RecyclerView?) {
-        assertEquals(2, utteranceList?.adapter?.itemCount)
-        onView(withText("User"))
-            .check(matches(isDisplayed()))
-        onView(withText("hello"))
-            .check(matches(isDisplayed()))
-        onView(withText("Assistant"))
-            .check(matches(isDisplayed()))
-        onView(withText(
-            "Hi! I can show you examples of helper intents. We recommend trying this sample on a phone so you can see all helper intents."
-        )).check(matches(isDisplayed()))
     }
 
     private fun checkActivityStartView(utteranceList: RecyclerView?) {
@@ -97,7 +75,7 @@ class MainActivityTest {
             .check(matches(isDisplayed()))
         onView(withId(R.id.listeningButton))
             .check(matches(isDisplayed()))
-            .check(matches(isEnabled()))
+            .check(matches(not(isEnabled())))
         assertEquals(0, utteranceList?.adapter?.itemCount ?: -1)
     }
 
@@ -110,24 +88,4 @@ class MainActivityTest {
             .putBoolean(ONBOARDING_DONE_KEY, state)
             .apply()
     }
-
-//    private fun provideAiResponse(): AIResponse {
-//        val date = Calendar.getInstance().time
-//        val result = ai.api.model.Result()
-//        result.action = "input.welcome"
-//        result.resolvedQuery = "hello"
-//        result.fulfillment = Fulfillment()
-//        result.fulfillment.speech = "Hi! I can show you examples of helper intents. We recommend trying this sample on a phone so you can see all helper intents."
-//        val status = Status()
-//        status.code = 200
-//        status.errorType = "success"
-//        status.errorDetails = null
-//        val response = AIResponse()
-//        response.id = "ac2f20fd-830f-4976-ac13-4dccf4009bf7-266f04e0"
-//        response.timestamp = date
-//        response.result = result
-//        response.status = status
-//        response.sessionId = "89c81e1f-5728-4d6e-8ae0-1a07c097a211"
-//        return  response
-//    }
 }

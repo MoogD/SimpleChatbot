@@ -25,7 +25,6 @@ class OnboardingViewModel @Inject constructor(
     private val preferenceHelper: PreferenceHelper
 ) : ViewModel() {
 
-
     private val onboardingSteps: Array<OnboardingStep> = setupOnboardingSteps()
 
     private var currentStepIndex: Int = 0
@@ -37,7 +36,7 @@ class OnboardingViewModel @Inject constructor(
 
     val signedIn: MutableLiveData<Boolean> = MutableLiveData()
 
-    private fun setupOnboardingSteps(): Array<OnboardingStep>{
+    private fun setupOnboardingSteps(): Array<OnboardingStep> {
         val onboardingStartFragment by lazy {
             OnboardingStep(
                 tag = LOGIN_FRAGMENT_TAG,
@@ -80,7 +79,7 @@ class OnboardingViewModel @Inject constructor(
     }
 
     fun onNextStep() {
-        if (currentStepIndex < onboardingSteps.size -1 ) {
+        if (currentStepIndex < onboardingSteps.size - 1) {
             currentStep.value = onboardingSteps[++currentStepIndex]
         } else {
             currentStep.value = null

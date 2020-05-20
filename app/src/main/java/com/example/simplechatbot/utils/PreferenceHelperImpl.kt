@@ -5,7 +5,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.gson.GsonBuilder
 import javax.inject.Inject
 
-class PreferenceHelperImpl @Inject constructor(val context: Context) : PreferenceHelper {
+class PreferenceHelperImpl @Inject constructor(context: Context) : PreferenceHelper {
 
     private val sharedPreferences =
         context.getSharedPreferences(APP_SETTINGS_KEY, Context.MODE_PRIVATE)

@@ -121,7 +121,7 @@ class OnboardingActivity : BaseActivity() {
 
     companion object {
         const val REQUEST_PERMISSIONS: Int = 20001
-        const val RC_SIGN_IN : Int = 20002
+        const val RC_SIGN_IN: Int = 20002
 
         fun intent(context: Context) =
             Intent(context, OnboardingActivity::class.java)

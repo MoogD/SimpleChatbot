@@ -16,7 +16,10 @@ import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.matcher.IntentMatchers.toPackage
 import androidx.test.espresso.intent.rule.IntentsTestRule
-import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isEnabled
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -67,7 +70,7 @@ class OnboardingActivityTest {
 
         checkStartFragment()
 
-        onboardingActivityScenario.onActivity{activity: OnboardingActivity? ->
+        onboardingActivityScenario.onActivity { activity: OnboardingActivity? ->
             activity?.let {
                 ViewModelProviders.of(
                     it,
@@ -178,5 +181,4 @@ class OnboardingActivityTest {
         onView(withId(R.id.container))
             .check(matches(isDisplayed()))
     }
-
 }
