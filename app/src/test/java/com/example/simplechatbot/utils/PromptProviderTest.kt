@@ -1,14 +1,12 @@
 package com.example.simplechatbot.utils
 
 import com.example.simplechatbot.assistant.AssistantIntent
+import junit.framework.Assert.assertEquals
 import org.junit.Test
 
-
-import org.junit.Assert.*
-
 class PromptProviderTest {
-    val callIntentWithEntity = AssistantIntent.CallIntent("Test")
-    val callIntent = AssistantIntent.CallIntent()
+    private val callIntentWithEntity = AssistantIntent.CallIntent("Test")
+    private val callIntent = AssistantIntent.CallIntent()
 
     @Test
     fun `test provideCallPrompt for call intent with entity`() {

@@ -74,7 +74,7 @@ class ChatBotApplicationModule {
 
     @Provides
     @Singleton
-    fun provideMicrophoneListener() : MicrophoneListener = MicrophoneListenerImpl()
+    fun provideMicrophoneListener(): MicrophoneListener = MicrophoneListenerImpl()
 
     @Provides
     @IntoMap

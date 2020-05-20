@@ -22,7 +22,7 @@ android {
         }
     }
 
-    buildToolsVersion "29.0.1"
+    buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId "com.example.simplechatbot"

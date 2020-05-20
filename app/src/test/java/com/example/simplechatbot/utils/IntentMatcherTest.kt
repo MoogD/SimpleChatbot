@@ -37,7 +37,6 @@ class IntentMatcherTest {
         assert(intent.entity == null)
     }
 
-
     private fun provideCallWithEntityResponse(): AnalyzeSyntaxResponse {
         val tokens = listOf<Token>(
             Token.newBuilder()
